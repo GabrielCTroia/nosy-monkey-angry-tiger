@@ -15,6 +15,7 @@
     "gulp-load-plugins": "*",
     "gulp-minify-css": "*",
     "gulp-minify-html": "*",
+    "gulp-notify": "^2.2.0",
     "gulp-open": "*",
     "gulp-processhtml": "*",
     "gulp-sourcemaps": "*",
