@@ -8,7 +8,7 @@ module NosyMonkeyAngryTiger.State {
       this.load.image('rockLeft', 'assets/images/rock-left.png');
       this.load.image('rockRight', 'assets/images/rock-right.png');
 
-      this.load.spritesheet('chimp', 'assets/images/chimp/chimp-sprite.png', 154, 152);
+      this.load.spritesheet('chimp', 'assets/images/chimp/chimp-sprite.png', 156, 152);
     }
 
     create() {
