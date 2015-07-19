@@ -11,6 +11,8 @@ module NosyMonkeyAngryTiger.State {
 
     private _lastDir;
 
+    private _playerBusy = false;
+
     create() {
 
       this._cursors = this.input.keyboard.createCursorKeys();
@@ -55,38 +57,54 @@ module NosyMonkeyAngryTiger.State {
     }
 
     private _setChimp() {
-      this._chimp = this.add.sprite(100, this._platforms.rockLeft.top - 400, 'chimp');
+      this._chimp = this.add.sprite(100, this._platforms.rockLeft.top - 120, 'chimp');
       this._chimp.scale.setTo(.7, .7);
 
       this.physics.arcade.enable(this._chimp);
 
-      this._chimp.body.bounce.y = .2;
+      //this._chimp.body.bounce.y = .2;
       this._chimp.body.gravity.y = 4000;
       this._chimp.body.collideWorldBounds = true;
 
-      this._chimp.animations.add('left', [5, 4], 7.5, true);
-      this._chimp.animations.add('standLeft', [5], 7.5, true);
       this._chimp.animations.add('right', [0, 1], 7.5, true);
-      this._chimp.animations.add('standRight', [0], 7.5, true);
-      this._chimp.animations.add('jumpLeft', [3], 1, true);
-      this._chimp.animations.add('jumpRight', [2], 1, true);
+      this._chimp.animations.add('jump-right', [2], 1, true);
+      this._chimp.animations.add('leap-right', [3], 1, true);
+      this._chimp.animations.add('land-right', [7], 1, true);
+      this._chimp.animations.add('crunch-right', [7], 1, true);
+
+      this._chimp.animations.add('left', [15, 14], 7.5, true);
+      this._chimp.animations.add('jump-left', [13], 1, true);
+      this._chimp.animations.add('leap-left', [11], 1, true);
+      this._chimp.animations.add('land-left', [8], 1, true);
+      this._chimp.animations.add('crunch-left', [8], 1, true);
     }
 
     update() {
-      this.physics.arcade.collide(this._chimp, this._platformsGroup);
+      this.physics.arcade.collide(this._chimp, this._platformsGroup, this._whenCollide.bind(this));
 
       //  Reset the players velocity (movement)
       this._chimp.body.velocity.x = 0;
       //
-      if (this._isJumpingLeft()) {
+
+      //if (!this._isPlayerBusy()) {
+
+      //this._isAboutToLand()
+      if (this._isAboutToLand()) {
+        this._chimp.animations.play(`crunch-${this._lastDir || 'right'}`);
+        //
+        //this._chimp.animations.stop();
+      }
+      else if (this._isLeapingLeft()) {
         this._chimp.body.velocity.x = -250;
 
-        this._chimp.animations.play('jumpLeft');
+        this._chimp.animations.play('leaping-left');
       }
-      else if (this._isJumpingRight()) {
+      else if (this._isLeapingRight()) {
+        console.log('is leaping right')
+
         this._chimp.body.velocity.x = 250;
 
-        this._chimp.animations.play('jumpRight');
+        this._chimp.animations.play('leap-right');
       }
       else if (this._canJump()) {
         this._chimp.body.velocity.y = -1400;
@@ -107,6 +125,9 @@ module NosyMonkeyAngryTiger.State {
 
         this._chimp.animations.play('right');
       }
+      else if (this._isCrunching()) {
+        this._chimp.animations.play(`crunch-${this._lastDir}`);
+      }
       //  Allow the player to jump if they are touching the ground.
       else {
         //  Stand still
@@ -118,8 +139,10 @@ module NosyMonkeyAngryTiger.State {
         }
       }
 
-
+      //}
     }
+
+    private _whenCollide = once(() => console.log('colision'));
 
     private _isMovingLeft() {
       return this._cursors.left.isDown;
@@ -127,6 +150,10 @@ module NosyMonkeyAngryTiger.State {
 
     private _isMovingRight() {
       return this._cursors.right.isDown;
+    }
+
+    private _isCrunching() {
+      return this._cursors.down.isDown;
     }
 
     private _canJump() {
@@ -137,12 +164,34 @@ module NosyMonkeyAngryTiger.State {
       return !this._chimp.body.touching.down;
     }
 
-    private _isJumpingLeft() {
+    private _isLeapingLeft() {
       return this._isInAir() && this._isMovingLeft();
     }
 
-    private _isJumpingRight() {
+    private _isLeapingRight() {
       return this._isInAir() && this._isMovingRight();
     }
+
+    private _isAboutToLand() {
+      return this._isInAir() && this._isGoingDown();
+    }
+
+    private _isGoingDown() {
+      return this._chimp.body.deltaY() > 0;
+    }
+
+  }
+
+  function once(fn, context = this) {
+    var result;
+
+    return function () {
+      if (fn) {
+        result = fn.apply(context, arguments);
+        fn = null;
+      }
+
+      return result;
+    };
   }
 }
